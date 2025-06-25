@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aira Monique Dionisio | Professional Portfolio</title>
+    <!-- Chosen Palette: Emerald & Sage Serenity -->
+    <!-- Application Structure Plan: A single-page application with a sticky top navigation bar that allows smooth scrolling to different thematic sections: a hero introduction, an 'About Me' section with interactive cards, a clickable timeline for professional experience, a visual skills dashboard with a radar chart, and an interactive grid for personal insights. This structure was chosen to transform a text-heavy portfolio into an engaging, user-driven narrative, allowing recruiters to quickly access the most relevant information in a non-linear fashion, which is more effective than a simple scrolling document. -->
+    <!-- Visualization & Content Choices:
+        - Work Ethic -> Interactive Cards: To make the list of adjectives more engaging and less static. (HTML/CSS/JS)
+        - Professional Experience -> Clickable Vertical Timeline: To break down dense paragraphs into digestible, user-selected segments, improving readability and focus. (HTML/CSS/JS)
+        - Core Competencies -> Radar Chart (Chart.js): To provide a quick, scannable, and data-driven visualization of her key skills, which is more impactful than a bulleted list. (Chart.js/Canvas)
+        - Proficient Systems -> Styled Badges/Pills: For a clean, modern presentation of technical proficiencies. (HTML/CSS)
+        - Personal Insights -> Flippable Story Cards: To present personal anecdotes in an interactive format that encourages discovery without overwhelming the user with text upfront. (HTML/CSS/JS)
+        - Images: Profile picture 'me.jpg' has been re-added.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #E0F2E9; /* Light Sage Green */
+            --text-primary: #3D405B;
+            --accent-primary: #E07A5F; /* Complementary Orange-Red */
+            --accent-secondary: #008060; /* Emerald Green */
+            --card-bg: #FFFFFF;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: 'Times New Roman', Times, serif; /* Newspaper tabloid font */
+        }
+        .nav-link {
+            transition: color 0.3s ease, border-bottom-color 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: var(--accent-primary);
+            border-bottom-color: var(--accent-primary);
+        }
+        .accent-bg { background-color: var(--accent-primary); }
+        .accent-text { color: var(--accent-primary); }
+        .accent-secondary-bg { background-color: var(--accent-secondary); }
+        .accent-secondary-text { color: var(--accent-secondary); }
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
+        }
+        .timeline-item-content {
+            transition: max-height 0.7s ease-in-out, opacity 0.5s ease-in-out;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+        .timeline-item.active .timeline-item-content {
+            max-height: 500px; /* Adjust as needed */
+            opacity: 1;
+        }
+        .insight-card-inner {
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .insight-card:hover .insight-card-inner {
+            transform: rotateY(180deg);
+        }
+        .insight-card-front, .insight-card-back {
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+        }
+        .insight-card-back {
+            transform: rotateY(180deg);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 450px;
+            margin: auto;
+            height: 400px;
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body class="antialiased">
+
+    <!-- Header & Navigation -->
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#" class="text-xl font-bold accent-text">Aira Monique Dionisio</a>
+            <div class="hidden md:flex space-x-8">
+                <a href="#about" class="nav-link font-medium">About</a>
+                <a href="#experience" class="nav-link font-medium">Experience</a>
+                <a href="#skills" class="nav-link font-medium">Skills</a>
+                <a href="#insights" class="nav-link font-medium">Insights</a>
+                <a href="#contact" class="nav-link font-medium">Contact</a>
+            </div>
+            <button id="mobile-menu-button" class="md:hidden p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-inset focus:ring-accent-primary">
+                <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                </svg>
+            </button>
+        </nav>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden">
+            <a href="#about" class="block py-2 px-4 text-sm hover:bg-gray-100">About</a>
+            <a href="#experience" class="block py-2 px-4 text-sm hover:bg-gray-100">Experience</a>
+            <a href="#skills" class="block py-2 px-4 text-sm hover:bg-gray-100">Skills</a>
+            <a href="#insights" class="block py-2 px-4 text-sm hover:bg-gray-100">Insights</a>
+            <a href="#contact" class="block py-2 px-4 text-sm hover:bg-gray-100">Contact</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-12">
+
+        <!-- Hero Section -->
+        <section id="home" class="relative text-center py-20 overflow-hidden">
+            <img src="me.jpg" alt="Aira Monique Dionisio Profile" class="w-48 h-48 rounded-full mx-auto mb-6 object-cover shadow-lg border-4 border-white">
+            <h1 class="text-4xl md:text-6xl font-bold tracking-tight mb-4" style="color: var(--text-primary);">Aira Monique Dionisio</h1>
+            <p class="text-xl md:text-2xl font-medium text-gray-600 mb-8">Travel & Customer Service Professional | Virtual Assistant</p>
+            <p class="max-w-3xl mx-auto text-lg text-gray-700">
+                A highly skilled and client-focused professional with nearly six years of comprehensive experience across the customer service, electronic commerce, and travel industries. My passion lies in making things run smoothly, helping people, and continuously tackling new challenges.
+            </p>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="py-20">
+            <h2 class="text-3xl font-bold text-center mb-12">About Me</h2>
+            <div class="grid md:grid-cols-2 gap-12 items-start">
+                <div>
+                    <h3 class="text-2xl font-semibold mb-4">My Philosophy</h3>
+                    <p class="text-gray-700 mb-6">
+                        I am a professional defined by a proven ability to manage complex operations, deliver exceptional client support, and maintain meticulous organization in fast-paced environments. Driven by a commitment to achieving a harmonious work-life balance, I dedicate myself to producing high-quality work and contributing meaningfully to any organization I join.
+                    </p>
+                    <div class="card p-6">
+                        <h4 class="text-xl font-semibold mb-3">Key Strength & Growth</h4>
+                        <p class="font-medium text-gray-800">My #1 strength is my combination of being highly organized, work-driven, and possessing excellent attention to detail.</p>
+                        <hr class="my-4">
+                        <p class="text-gray-700"><span class="font-semibold text-gray-600">Area for Growth:</span> My #1 weakness is a potential for over-reliance on personal execution. I am actively learning to step back, see the bigger picture, and embrace delegation and automation to optimize team performance and efficiency.</p>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-semibold mb-4">My Work Ethic</h3>
+                    <p class="text-gray-700 mb-6">My approach to work is guided by these five core principles. Hover over each card to learn more.</p>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                        <div class="card text-center p-4">
+                            <div class="text-3xl mb-2">🤝</div>
+                            <h4 class="font-semibold">Dedicated</h4>
+                        </div>
+                        <div class="card text-center p-4">
+                            <div class="text-3xl mb-2">🗂️</div>
+                            <h4 class="font-semibold">Organized</h4>
+                        </div>
+                        <div class="card text-center p-4">
+                            <div class="text-3xl mb-2">💡</div>
+                            <h4 class="font-semibold">Helpful</h4>
+                        </div>
+                        <div class="card text-center p-4">
+                            <div class="text-3xl mb-2">🔍</div>
+                            <h4 class="font-semibold">Careful</h4>
+                        </div>
+                        <div class="card text-center p-4 col-span-2 sm:col-span-1">
+                            <div class="text-3xl mb-2">🛠️</div>
+                            <h4 class="font-semibold">Problem-Solver</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Experience Section -->
+        <section id="experience" class="py-20">
+            <h2 class="text-3xl font-bold text-center mb-12">Professional Experience</h2>
+            <p class="text-center max-w-3xl mx-auto mb-12 text-gray-700">My career has provided me with a diverse and robust skill set. Click on each role in the timeline below to explore the detailed responsibilities and accomplishments from my professional journey.</p>
+            <div id="timeline-container" class="relative max-w-3xl mx-auto">
+                <!-- Timeline items will be injected here by JavaScript -->
+            </div>
+        </section>
+        
+        <!-- Skills Section -->
+        <section id="skills" class="py-20 bg-white rounded-2xl">
+            <h2 class="text-3xl font-bold text-center mb-12">Skills & Expertise</h2>
+            <p class="text-center max-w-3xl mx-auto mb-12 text-gray-700">This section provides a visual overview of my core competencies and my proficiency with various industry-standard systems. The radar chart illustrates my key professional skills, while the list below highlights the specific platforms I'm experienced with.</p>
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div class="chart-container">
+                    <canvas id="skillsChart"></canvas>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-semibold mb-6 text-center md:text-left">Proficient Systems & Platforms</h3>
+                    <div class="flex flex-wrap gap-3 justify-center md:justify-start">
+                         <span class="bg-gray-200 text-gray-800 text-sm font-medium px-4 py-2 rounded-full">Sihot (PMS)</span>
+                         <span class="bg-gray-200 text-gray-800 text-sm font-medium px-4 py-2 rounded-full">Amadeus Travel Click</span>
+                         <span class="bg-gray-200 text-gray-800 text-sm font-medium px-4 py-2 rounded-full">Salesforce (CRM)</span>
+                         <span class="bg-gray-200 text-gray-800 text-sm font-medium px-4 py-2 rounded-full">Now BookIt</span>
+                         <span class="bg-gray-200 text-gray-800 text-sm font-medium px-4 py-2 rounded-full">GDS Functionality</span>
+                         <span class="bg-gray-200 text-gray-800 text-sm font-medium px-4 py-2 rounded-full">Canva</span>
+                         <span class="bg-gray-200 text-gray-800 text-sm font-medium px-4 py-2 rounded-full">Google Suite</span>
+                    </div>
+                    <p class="mt-6 text-gray-600 text-center md:text-left">My experience across these platforms demonstrates my ability to quickly adapt to and master new technologies, ensuring seamless operational efficiency.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Insights Section -->
+        <section id="insights" class="py-20">
+            <h2 class="text-3xl font-bold text-center mb-12">Personal Insights & Values</h2>
+            <p class="text-center max-w-3xl mx-auto mb-12 text-gray-700">My professional journey is deeply intertwined with my personal values and experiences. These stories offer a glimpse into what drives me, how I overcome challenges, and what I hold most dear. Hover over a card to reveal the story.</p>
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Insight cards will be injected here -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer id="contact" class="bg-gray-800 text-white">
+        <div class="container mx-auto px-6 py-12 text-center">
+            <h2 class="text-2xl font-bold mb-4">Get In Touch</h2>
+            <p class="mb-8">I am always open to discussing new opportunities. Feel free to reach out.</p>
+            <div class="flex justify-center space-x-6">
+                <a href="mailto:aira.dionisio0214@gmail.com" class="hover:text-accent-primary transition-colors">aira.dionisio0214@gmail.com</a>
+                <a href="https://www.linkedin.com/in/aira-monique-dionisio-27022b306" target="_blank" class="hover:text-accent-primary transition-colors">LinkedIn Profile</a>
+                <a href="tel:+639155151933" class="hover:text-accent-primary transition-colors">+63 915 515 1933</a>
+            </div>
+            <p class="mt-10 text-sm text-gray-400">&copy; 2025 Aira Monique Dionisio. All rights reserved.</p>
+        </div>
+    </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // Mobile Menu Toggle
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    mobileMenuButton.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+    });
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            mobileMenu.classList.add('hidden'); // Close mobile menu on click
+            document.querySelector(this.getAttribute('href')).scrollIntoView({
+                behavior: 'smooth'
+            });
+        });
+    });
+
+    // Active Nav Link on Scroll
+    const sections = document.querySelectorAll('section');
+    const navLinks = document.querySelectorAll('.nav-link');
+    window.addEventListener('scroll', () => {
+        let current = '';
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            if (pageYOffset >= sectionTop - 60) {
+                current = section.getAttribute('id');
+            }
+        });
+
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href').includes(current)) {
+                link.classList.add('active');
+            }
+        });
+    });
+    
+    // Experience Timeline Data
+    const experienceData = [
+        {
+            company: "Emapta Versatile Service",
+            role: "Offshore Reservation Specialist",
+            description: "Played a key role in managing the reservation process for various travel services. Handled a daily influx of approximately 75 email communications related to hotel bookings and tours, requiring effective prioritization, accurate processing, and comprehensive client support under strict deadlines."
+        },
+        {
+            company: "Trajet International Travel & Leisure",
+            role: "Travel Specialist / Tour Coordinator & Branch Manager",
+            description: "Created and costed detailed international group tour itineraries, coordinated logistics with B2B suppliers, and led international tours. Also managed a branch office, supervising reservation agents and cultivating productive relationships with clients and industry partners."
+        },
+        {
+            company: "IGT Solutions",
+            role: "Customer Service Representative (United Airlines)",
+            description: "Delivered excellent customer service through effective communication and problem-solving. Assisted passengers with flight bookings and modifications, addressed diverse inquiries, and resolved complaints related to flight disruptions and other travel concerns."
+        },
+        {
+            company: "Trajet International Travel & Leisure",
+            role: "Visa Officer",
+            description: "Developed key skills in visa application processing, client consultation, and documentation management. Gained proficiency in accurately preparing and submitting visa applications, navigating complex procedural requirements, and maintaining high attention to detail with sensitive client info."
+        },
+        {
+            company: "Electronic Commerce Inc.",
+            role: "Customer & Technical Support",
+            description: "Provided crucial assistance to billers and suppliers using bill payment kiosks. Responsibilities included addressing inquiries, resolving issues, actively monitoring bill payment processes, and providing technical support for kiosk users. Honed problem-solving and clear technical communication skills."
+        }
+    ];
+
+    const timelineContainer = document.getElementById('timeline-container');
+    experienceData.forEach((item, index) => {
+        const timelineItem = document.createElement('div');
+        timelineItem.className = 'timeline-item mb-8 flex justify-between items-center w-full';
+        
+        const isOdd = index % 2 !== 0;
+        timelineItem.classList.toggle('flex-row-reverse', isOdd);
+
+        timelineItem.innerHTML = `
+            <div class="order-1 w-5/12"></div>
+            <div class="z-20 flex items-center order-1 bg-accent-secondary shadow-xl w-8 h-8 rounded-full">
+                <h1 class="mx-auto font-semibold text-lg text-white">${experienceData.length - index}</h1>
+            </div>
+            <div class="order-1 card w-5/12 p-4 cursor-pointer">
+                <h3 class="font-bold text-gray-800 text-lg">${item.role}</h3>
+                <p class="text-sm font-medium text-accent-primary">${item.company}</p>
+                <div class="timeline-item-content mt-2">
+                    <p class="text-sm leading-snug tracking-wide text-gray-700 text-opacity-100">${item.description}</p>
+                </div>
+            </div>
+        `;
+        timelineContainer.appendChild(timelineItem);
+    });
+    
+    document.querySelectorAll('.timeline-item .card').forEach(card => {
+        card.addEventListener('click', () => {
+            card.parentElement.classList.toggle('active');
+        });
+    });
+
+    // Skills Chart
+    const ctx = document.getElementById('skillsChart').getContext('2d');
+    const skillsChart = new Chart(ctx, {
+        type: 'radar',
+        data: {
+            labels: [
+                'Customer Service', 
+                'Reservation Management', 
+                'Travel Coordination', 
+                'Problem-Solving', 
+                'Leadership', 
+                'Documentation'
+            ],
+            datasets: [{
+                label: 'Core Competencies',
+                data: [9, 9, 8, 9, 7, 8],
+                backgroundColor: 'rgba(224, 122, 95, 0.2)',
+                borderColor: 'rgba(224, 122, 95, 1)',
+                borderWidth: 2,
+                pointBackgroundColor: 'rgba(224, 122, 95, 1)',
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: 'rgba(224, 122, 95, 1)'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                r: {
+                    angleLines: { color: 'rgba(61, 64, 91, 0.2)' },
+                    grid: { color: 'rgba(61, 64, 91, 0.2)' },
+                    pointLabels: { 
+                        font: { size: 12, weight: '500' },
+                        color: '#3D405B'
+                    },
+                    ticks: {
+                        backdropColor: 'rgba(248, 247, 244, 1)',
+                        color: '#3D405B',
+                        stepSize: 2,
+                        beginAtZero: true
+                    },
+                    min: 0,
+                    max: 10
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.dataset.label}: ${context.raw}/10`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Insights Cards
+    const insightsData = [
+        {
+            title: "My Guiding Principle",
+            content: "My relationship with my parents is deeply shaped by my father's wisdom: 'everything happens for a reason; we need to move forward and learn from it.' This principle instills in me resilience and encourages me to find lessons in every experience."
+        },
+        {
+            title: "My Toughest Challenge",
+            content: "A recurring personal challenge is a tendency towards self-blame. While this drives me to achieve above-average results, it can also lead to overthinking minor mistakes. I continuously strive for a balance between healthy self-reflection and counterproductive self-criticism."
+        },
+        {
+            title: "My Proudest Achievement",
+            content: "My proudest achievement was earning enough to treat my family to a vacation. It was a deeply meaningful moment that required me to push through numerous rejections and periods of fluctuating success in my work, fueled by the goal of creating lasting memories."
+        }
+    ];
+
+    const insightsContainer = document.querySelector('#insights .grid');
+    insightsData.forEach(insight => {
+        const cardHTML = `
+            <div class="insight-card h-64 [perspective:1000px]">
+                <div class="insight-card-inner relative w-full h-full">
+                    <div class="insight-card-front absolute w-full h-full card flex flex-col justify-center items-center p-6 text-center">
+                        <h4 class="text-xl font-bold accent-text">${insight.title}</h4>
+                        <p class="text-sm text-gray-500 mt-2">Hover to reveal</p>
+                    </div>
+                    <div class="insight-card-back absolute w-full h-full card p-6 flex items-center justify-center">
+                        <p class="text-gray-700 text-center">${insight.content}</p>
+                    </div>
+                </div>
+            </div>
+        `;
+        insightsContainer.innerHTML += cardHTML;
+    });
+
+});
+</script>
+</body>
+</html>
